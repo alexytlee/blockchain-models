@@ -3,9 +3,29 @@ let Blockchain = require('./blockchain');
 let BlockchainNode = require('./BlockchainNode');
 let Transaction = require('./transaction');
 
+let fetch = require('node-fetch');
+
 const express = require('express');
 const app = express();
 var bodyParser = require('body-parser');
+
+app.get('/resolve', function(req, res) {
+	nodes.forEach(function(node) {
+		fetch(node.url + '/blockchain')
+			.then(function(response) {
+				return response.json();
+			})
+			.then(function(otherNodeBlockchain) {
+				if (
+					blockchain.blocks.length < otherNodeBlockchain.blocks.length
+				) {
+					blockchain = otherNodeBlockchain;
+				}
+
+				res.send(blockchain);
+			});
+	});
+});
 
 let port = 3000;
 
