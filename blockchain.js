@@ -16,6 +16,20 @@ class Blockchain {
 		this.blocks.push(block);
 	}
 
+	transactionsByDrivingLicenseNumber(drivingLicenseNumber) {
+		let transactions = [];
+
+		this.blocks.forEach(function(block) {
+			block.transactions.forEach(function(transaction) {
+				if (drivingLicenseNumber == transaction.drivingLicenseNumber) {
+					transactions.push(transaction);
+				}
+			});
+		});
+
+		return transactions;
+	}
+
 	getNextBlock(transactions) {
 		let block = new Block();
 

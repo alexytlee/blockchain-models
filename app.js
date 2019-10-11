@@ -2,6 +2,8 @@ let Block = require('./block');
 let Blockchain = require('./blockchain');
 let BlockchainNode = require('./BlockchainNode');
 let Transaction = require('./transaction');
+let sha256 = require('js-sha256');
+let DriverRecordSmartContract = require('./smartContracts');
 
 let fetch = require('node-fetch');
 
@@ -69,12 +71,33 @@ app.get('/mine', function(req, res) {
 	res.json(block);
 });
 
-app.post('/transactions', function(req, res) {
-	let to = req.body.to;
-	let from = req.body.from;
-	let amount = req.body.amount;
+// driving-records/TX1234
+// driving-records/CA1234
+app.get('/driving-records/:drivingLicenseNumber', function(req, res) {
+	let driverLicenseNumber = sha256(req.params.driverLicenseNumber);
 
-	let transaction = new Transaction(from, to, amount);
+	let transactions = blockchain.transactionsByDrivingLicenseNumber(
+		driverLicenseNumber
+	);
+
+	res.json(transactions);
+});
+
+app.post('/transactions', function(req, res) {
+	console.log(transactions);
+
+	let drivingRecordSmartContract = new DriverRecordSmartContract();
+	let driverLicenseNumber = sha256(req.body.driverLicenseNumber);
+	let violationDate = req.body.violationDate;
+	let violationType = req.body.violationType;
+
+	let transaction = new Transaction(
+		driverLicenseNumber,
+		violationDate,
+		violationType
+	);
+
+	drivingRecordSmartContract.apply(transaction, blockchain.blocks);
 
 	transactions.push(transaction);
 
